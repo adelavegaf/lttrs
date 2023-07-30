@@ -6,7 +6,7 @@ use rand::{Rng, RngCore};
 fn main() -> Result<()> {
     let mut rng = rand::thread_rng();
     let board = create_board(&mut rng);
-    println!("{:#?}", board);
+    print_board(&board);
 
     let vocab = std::fs::read_to_string("./data/twl06.txt")?
         .split('\n')
@@ -25,6 +25,12 @@ type Board = [[u8; BOARD_SIZE]; BOARD_SIZE];
 
 fn create_board(rng: &mut impl RngCore) -> Board {
     core::array::from_fn(|_| core::array::from_fn(|_| rng.gen_range(b'A'..=b'Z')))
+}
+
+fn print_board(board: &Board) {
+    for row in board {
+        println!("{}", std::str::from_utf8(row).unwrap());
+    }
 }
 
 fn find_words(board: &Board, vocab: &HashSet<String>) -> HashSet<String> {
