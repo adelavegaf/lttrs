@@ -1,21 +1,5 @@
-use std::{cmp, collections::HashSet, fmt::Display};
-
-use anyhow::Result;
 use rand::{Rng, RngCore};
-
-fn main() -> Result<()> {
-    let mut rng = rand::thread_rng();
-
-    let vocab = std::fs::read_to_string("./data/twl06.txt")?
-        .split('\n')
-        .map(String::from)
-        .collect();
-
-    let game = Game::new(&mut rng, &vocab);
-    println!("{}", game);
-
-    Ok(())
-}
+use std::{cmp, collections::HashSet, fmt::Display};
 
 pub struct Game {
     pub board: Board,
