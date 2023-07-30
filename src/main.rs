@@ -1,23 +1,33 @@
-use std::{cmp, collections::HashSet};
+use std::{cmp, collections::HashSet, fmt::Display};
 
 use anyhow::Result;
 use rand::{Rng, RngCore};
 
 fn main() -> Result<()> {
     let mut rng = rand::thread_rng();
-    let board = create_board(&mut rng);
-    print_board(&board);
 
     let vocab = std::fs::read_to_string("./data/twl06.txt")?
         .split('\n')
         .map(String::from)
         .collect();
 
-    let words = find_words(&board, &vocab);
-
-    println!("{:#?}", words);
+    let game = Game::new(&mut rng, &vocab);
+    println!("{}", game);
 
     Ok(())
+}
+
+pub struct Game {
+    pub board: Board,
+    pub words: HashSet<String>,
+}
+
+impl Game {
+    pub fn new(rng: &mut impl RngCore, vocab: &HashSet<String>) -> Self {
+        let board = create_board(rng);
+        let words = find_words(&board, vocab);
+        Self { board, words }
+    }
 }
 
 const BOARD_SIZE: usize = 4;
@@ -25,12 +35,6 @@ type Board = [[u8; BOARD_SIZE]; BOARD_SIZE];
 
 fn create_board(rng: &mut impl RngCore) -> Board {
     core::array::from_fn(|_| core::array::from_fn(|_| rng.gen_range(b'A'..=b'Z')))
-}
-
-fn print_board(board: &Board) {
-    for row in board {
-        println!("{}", std::str::from_utf8(row).unwrap());
-    }
 }
 
 fn find_words(board: &Board, vocab: &HashSet<String>) -> HashSet<String> {
@@ -75,5 +79,25 @@ fn find_words_starting_at(
             // [[bool; 4]; 4] implements copy so no need to be explicit with the clone
             find_words_starting_at(pos, board, vocab, visited, cur_word.clone(), results);
         }
+    }
+}
+
+impl Display for Game {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        writeln!(f, "Board")?;
+        for row in &self.board {
+            for c in row {
+                write!(f, "{} ", *c as char)?;
+            }
+            writeln!(f)?;
+        }
+
+        writeln!(f)?;
+        writeln!(f, "Words")?;
+        for w in &self.words {
+            writeln!(f, "{}", w)?;
+        }
+
+        Ok(())
     }
 }
